@@ -1,0 +1,310 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-Healthcare Farmasi & Obat API",
+        "description": "API Service untuk Service Farmasi & Obat dalam ekosistem E-Healthcare Telkom University",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000"
+        }
+    ],
+    "paths": {
+        "/api/v1/pharmacy": {
+            "get": {
+                "tags": [
+                    "Pharmacy"
+                ],
+                "summary": "Ambil semua data resep dan obat",
+                "operationId": "048e02f32406fbf26b1f5a6b105200ea",
+                "responses": {
+                    "200": {
+                        "description": "Data resep berhasil diambil"
+                    },
+                    "401": {
+                        "description": "API Key tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pharmacy"
+                ],
+                "summary": "Tambah resep obat digital baru",
+                "operationId": "3160736e216fb58b76237a0d033a7a82",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PharmacyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resep berhasil dicatat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "401": {
+                        "description": "API Key tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/pharmacy/{id}": {
+            "get": {
+                "tags": [
+                    "Pharmacy"
+                ],
+                "summary": "Ambil detail resep berdasarkan ID",
+                "operationId": "13394994518a4617e25e751a61def34e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data resep ditemukan"
+                    },
+                    "404": {
+                        "description": "Resep tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "API Key tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Pharmacy"
+                ],
+                "summary": "Update data resep",
+                "operationId": "43ccd29dd54c91796d6efe4c2e7163e9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PharmacyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resep berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Resep tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "API Key tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Pharmacy"
+                ],
+                "summary": "Hapus data resep",
+                "operationId": "53ef99b75132a220c02850b58c632ced",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resep berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Resep tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "API Key tidak valid"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "PharmacyResource": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440002"
+                    },
+                    "patient_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "appointment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "medicine_name": {
+                        "type": "string",
+                        "example": "Paracetamol 500mg"
+                    },
+                    "dosage": {
+                        "type": "string",
+                        "example": "500mg"
+                    },
+                    "frequency": {
+                        "type": "string",
+                        "example": "3x sehari"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "example": "Diminum setelah makan"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "PENDING",
+                        "enum": [
+                            "PENDING",
+                            "PREPARING",
+                            "READY_TO_PICKUP",
+                            "DISPENSED"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PharmacyRequest": {
+                "required": [
+                    "medicine_name",
+                    "dosage",
+                    "frequency",
+                    "quantity"
+                ],
+                "properties": {
+                    "patient_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "appointment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "medicine_name": {
+                        "type": "string",
+                        "example": "Paracetamol 500mg"
+                    },
+                    "dosage": {
+                        "type": "string",
+                        "example": "500mg"
+                    },
+                    "frequency": {
+                        "type": "string",
+                        "example": "3x sehari"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "example": "Diminum setelah makan"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "PENDING",
+                        "enum": [
+                            "PENDING",
+                            "PREPARING",
+                            "READY_TO_PICKUP",
+                            "DISPENSED"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "name": "X-IAE-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Pharmacy",
+            "description": "Service Farmasi & Obat - Manajemen resep digital dan distribusi obat"
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+enum PharmacyStatus {
+    PENDING
+    PREPARING
+    READY_TO_PICKUP
+    DISPENSED
+}
+
+type Pharmacy {
+    id: ID!
+    patient_id: ID!
+    appointment_id: ID!
+    medicine_name: String!
+    dosage: String!
+    frequency: String!
+    quantity: Int!
+    instructions: String
+    status: PharmacyStatus!
+    patient: Patient! @belongsTo
+    appointment: Appointment! @belongsTo
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+input CreatePharmacyInput {
+    patient_id: ID! @rules(apply: ["exists:patients,id"])
+    appointment_id: ID! @rules(apply: ["exists:appointments,id"])
+    medicine_name: String!
+    dosage: String!
+    frequency: String!
+    quantity: Int!
+    instructions: String
+    status: PharmacyStatus
+}
+
+input UpdatePharmacyInput {
+    patient_id: ID @rules(apply: ["exists:patients,id"])
+    appointment_id: ID @rules(apply: ["exists:appointments,id"])
+    medicine_name: String
+    dosage: String
+    frequency: String
+    quantity: Int
+    instructions: String
+    status: PharmacyStatus
+}
+
+extend type Query {
+    pharmacies: [Pharmacy!] @all
+    pharmacy(id: ID! @eq): Pharmacy @find
+}
+
+extend type Mutation {
+    createPharmacy(input: CreatePharmacyInput! @spread): Pharmacy! @create
+    updatePharmacy(id: ID!, input: UpdatePharmacyInput! @spread): Pharmacy! @update
+    deletePharmacy(id: ID!): Pharmacy @delete
+}

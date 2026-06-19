@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 102022400056_RENT-CONTRACT
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+      - /var/www/bootstrap/cache
+  
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_vite
+    restart: unless-stopped
+    working_dir: /var/www
+    command: npm run dev -- --host
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/var/www
+      - /var/www/node_modules
+      - /var/www/bootstrap/cache

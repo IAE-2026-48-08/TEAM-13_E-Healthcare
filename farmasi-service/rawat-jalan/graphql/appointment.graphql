@@ -1,0 +1,55 @@
+enum AppointmentStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+type Appointment {
+    id: ID!
+    patient_id: ID!
+    doctor_name: String!
+    doctor_specialization: String
+    appointment_date: DateTime!
+    status: AppointmentStatus!
+    complaint: String
+    diagnosis: String
+    notes: String
+    patient: Patient! @belongsTo
+    pharmacy: [Pharmacy!] @hasMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+input CreateAppointmentInput {
+    patient_id: ID! @rules(apply: ["exists:patients,id"])
+    doctor_name: String!
+    doctor_specialization: String
+    appointment_date: DateTime!
+    status: AppointmentStatus
+    complaint: String
+    diagnosis: String
+    notes: String
+}
+
+input UpdateAppointmentInput {
+    patient_id: ID @rules(apply: ["exists:patients,id"])
+    doctor_name: String
+    doctor_specialization: String
+    appointment_date: DateTime
+    status: AppointmentStatus
+    complaint: String
+    diagnosis: String
+    notes: String
+}
+
+extend type Query {
+    appointments: [Appointment!] @all
+    appointment(id: ID! @eq): Appointment @find
+}
+
+extend type Mutation {
+    createAppointment(input: CreateAppointmentInput! @spread): Appointment! @create
+    updateAppointment(id: ID!, input: UpdateAppointmentInput! @spread): Appointment! @update
+    deleteAppointment(id: ID!): Appointment @delete
+}

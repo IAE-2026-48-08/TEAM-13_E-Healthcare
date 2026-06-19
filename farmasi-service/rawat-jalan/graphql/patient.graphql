@@ -1,0 +1,53 @@
+enum Gender {
+    MALE
+    FEMALE
+}
+
+type Patient {
+    id: ID!
+    name: String!
+    nik: String!
+    email: String!
+    phone: String
+    date_of_birth: Date!
+    gender: Gender!
+    address: String
+    medical_history: String
+    appointments: [Appointment!] @hasMany
+    pharmacy: [Pharmacy!] @hasMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+input CreatePatientInput {
+    name: String!
+    nik: String! @rules(apply: ["size:16", "unique:patients,nik"])
+    email: String! @rules(apply: ["email", "unique:patients,email"])
+    phone: String
+    date_of_birth: Date!
+    gender: Gender!
+    address: String
+    medical_history: String
+}
+
+input UpdatePatientInput {
+    name: String
+    nik: String @rules(apply: ["size:16"])
+    email: String @rules(apply: ["email"])
+    phone: String
+    date_of_birth: Date
+    gender: Gender
+    address: String
+    medical_history: String
+}
+
+extend type Query {
+    patients: [Patient!] @all
+    patient(id: ID! @eq): Patient @find
+}
+
+extend type Mutation {
+    createPatient(input: CreatePatientInput! @spread): Patient! @create
+    updatePatient(id: ID!, input: UpdatePatientInput! @spread): Patient! @update
+    deletePatient(id: ID!): Patient @delete
+}
