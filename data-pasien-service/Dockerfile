@@ -3,9 +3,8 @@ FROM php:8.3-cli
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev libpng-dev \
     libonig-dev libxml2-dev libicu-dev nodejs npm \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip gd intl bcmath sockets \
-    && pecl channel-update pecl.php.net \
-    && pecl install redis && docker-php-ext-enable redis \
+    && docker-php-ext-install \
+    pdo pdo_mysql mbstring zip gd intl bcmath \
     && apt-get clean
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -20,7 +19,4 @@ RUN npm install && npm run build
 
 EXPOSE 8000
 
-CMD php artisan migrate --force && \
-    php artisan clear-compiled && \
-    php artisan optimize:clear && \
-    php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan serve --host=0.0.0.0 --port=8000
