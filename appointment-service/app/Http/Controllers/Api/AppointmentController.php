@@ -160,39 +160,69 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::create($validated);
 
-        $authHeader = $request->header('Authorization');
-        $token = str_replace('Bearer ', '', $authHeader);
+        // END-TO-END FLOW: Call Farmasi Service internally to create an initial prescription
+        try {
+            $farmasiResponse = \Illuminate\Support\Facades\Http::withHeaders([
+                'X-IAE-KEY' => 'KEY-MHS-157'
+            ])->post('http://farmasi-service:8000/api/v1/pharmacy', [
+                'patient_id' => '00000000-0000-0000-0000-000000000000', // Default dummy UUID
+                'appointment_id' => '00000000-0000-0000-0000-000000000000', // Default dummy UUID
+                'medicine_name' => 'Konsultasi Standar (Vitamin C)',
+                'dosage' => '1 tablet',
+                'frequency' => '1x sehari',
+                'quantity' => 10,
+                'instructions' => 'Diminum setelah makan',
+                'status' => 'PENDING'
+            ]);
+            $farmasiResult = $farmasiResponse->successful() ? $farmasiResponse->json() : ['error' => 'Gagal memanggil Farmasi', 'details' => $farmasiResponse->body()];
+        } catch (\Exception $e) {
+            $farmasiResult = ['error' => 'Exception saat memanggil Farmasi', 'message' => $e->getMessage()];
+        }
 
-        $soapAudit = $soapAuditService->sendAppointmentAudit(
-            $appointment->toArray(),
-            $token
-        );
-
-        $appointment->update([
-            'soap_receipt_number' => $soapAudit['receipt_number'],
-            'soap_audit_response' => $soapAudit['body'],
+        // Dapatkan M2M Token
+        $m2mResponse = \Illuminate\Support\Facades\Http::post('https://iae-sso.virtualfri.id/api/v1/auth/token', [
+            'api_key' => env('IAE_API_KEY', 'KEY-MHS-157'),
+            'nim' => '102022400084'
         ]);
-        $rabbitMq = $rabbitMqPublisherService->publishAppointmentCreated(
-        $appointment->fresh()->toArray(),
-            $token
-);
+        $m2mToken = $m2mResponse->json('token') ?? $m2mResponse->json('access_token');
+
+        $soapAudit = ['success' => false, 'status_code' => 500, 'receipt_number' => null, 'body' => 'No M2M token'];
+        $rabbitMq = ['success' => false, 'status_code' => 500, 'body' => 'No M2M token'];
+
+        if ($m2mToken) {
+            $soapAudit = $soapAuditService->sendAppointmentAudit(
+                $appointment->toArray(),
+                $m2mToken
+            );
+
+            $appointment->update([
+                'soap_receipt_number' => $soapAudit['receipt_number'] ?? null,
+                'soap_audit_response' => is_string($soapAudit['body']) ? $soapAudit['body'] : json_encode($soapAudit['body']),
+            ]);
+
+            $rabbitMq = $rabbitMqPublisherService->publishAppointmentCreated(
+                $appointment->fresh()->toArray(),
+                $m2mToken
+            );
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Appointment created successfully',
             'data' => $appointment->fresh(),
-'integration' => [
-    'soap_audit' => [
-        'success' => $soapAudit['success'],
-        'status_code' => $soapAudit['status_code'],
-        'receipt_number' => $soapAudit['receipt_number'],
-    ],
-    'rabbitmq_publish' => [
-        'success' => $rabbitMq['success'],
-        'status_code' => $rabbitMq['status_code'],
-        'response' => $rabbitMq['body'],
-    ]
-],
+            'integration' => [
+                'soap_audit' => [
+                    'success' => $soapAudit['success'],
+                    'status_code' => $soapAudit['status_code'],
+                    'receipt_number' => $soapAudit['receipt_number'],
+                ],
+                'rabbitmq_publish' => [
+                    'success' => $rabbitMq['success'],
+                    'status_code' => $rabbitMq['status_code'],
+                    'response' => $rabbitMq['body'],
+                ],
+                'farmasi_cross_service' => $farmasiResult
+            ],
             'meta' => [
                 'service_name' => 'Appointment-Service',
                 'api_version' => 'v1'

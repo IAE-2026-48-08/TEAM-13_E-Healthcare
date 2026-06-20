@@ -8,8 +8,8 @@ class SoapAuditService
 {
     public function sendAppointmentAudit(array $appointment, string $token): array
     {
-        $url = env('IAE_SOAP_AUDIT_URL');
-        $apiKey = env('IAE_API_KEY');
+        $url = env('IAE_SOAP_AUDIT_URL', 'https://iae-sso.virtualfri.id/soap/v1/audit');
+        $apiKey = env('IAE_API_KEY', 'KEY-MHS-157');
 
         $xml = $this->buildSoapEnvelope($appointment);
 
@@ -56,16 +56,15 @@ private function buildSoapEnvelope(array $appointment): string
     ]);
 
     return '<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iae="http://iae.telkomuniversity.ac.id/audit">
-    <soapenv:Header/>
-    <soapenv:Body>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iae="http://iae.central/audit">
+    <soap:Body>
         <iae:AuditRequest>
             <iae:TeamID>' . htmlspecialchars($teamId) . '</iae:TeamID>
             <iae:ActivityName>' . htmlspecialchars($activityName) . '</iae:ActivityName>
-            <iae:LogContent>' . htmlspecialchars($logContent) . '</iae:LogContent>
+            <iae:LogContent><![CDATA[' . $logContent . ']]></iae:LogContent>
         </iae:AuditRequest>
-    </soapenv:Body>
-</soapenv:Envelope>';
+    </soap:Body>
+</soap:Envelope>';
 }
 
 private function extractReceiptNumber(string $xml): ?string

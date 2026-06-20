@@ -12,7 +12,8 @@ class CheckApiKey
     {
         $apiKey = $request->header('X-IAE-KEY');
 
-        if ($apiKey !== '102022400300') {
+        $expectedKey = env('IAE_API_KEY', 'KEY-MHS-157');
+        if ($apiKey !== $expectedKey) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized. Invalid or missing API Key.',
