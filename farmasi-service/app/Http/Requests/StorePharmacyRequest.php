@@ -7,6 +7,8 @@ class StorePharmacyRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'patient_id'     => 'nullable|string',
+            'appointment_id' => 'nullable|string',
             'medicine_name'  => 'required|string|max:255',
             'dosage'         => 'required|string|max:100',
             'frequency'      => 'required|string|max:100',

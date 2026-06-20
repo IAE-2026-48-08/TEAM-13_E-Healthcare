@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePharmacyRequest;
 use App\Http\Resources\PharmacyResource;
 use App\Models\Pharmacy;
+use App\Services\InternalServiceClient;
 use App\Services\RabbitMqService;
 use App\Services\SoapAuditService;
 use App\Services\SsoService;
@@ -63,6 +64,7 @@ class PharmacyController extends Controller
         private SsoService $ssoService,
         private SoapAuditService $soapAuditService,
         private RabbitMqService $rabbitMqService,
+        private InternalServiceClient $internalServiceClient,
     ) {}
 
     #[OA\Get(
@@ -103,14 +105,48 @@ class PharmacyController extends Controller
     )]
     public function store(StorePharmacyRequest $request): JsonResponse
     {
-        // Simpan resep ke database
-        $pharmacy = Pharmacy::create($request->validated());
+        $validated = $request->validated();
 
         $integrationResult = [
-            'sso'      => null,
-            'soap'     => null,
-            'rabbitmq' => null,
+            'sso'               => null,
+            'soap'              => null,
+            'rabbitmq'          => null,
+            'patient_check'     => null,
+            'appointment_check' => null,
         ];
+
+        // Step 0a: Validasi patient_id ke Data Pasien Service (REST internal, antar-container)
+        if (!empty($validated['patient_id'])) {
+            $patientCheck = $this->internalServiceClient->getPatient($validated['patient_id']);
+            $integrationResult['patient_check'] = $patientCheck['success'] ? 'success' : 'failed';
+
+            if (!$patientCheck['success']) {
+                return $this->errorResponse(
+                    'Resep tidak dapat dibuat: '.$patientCheck['message'],
+                    422,
+                    null,
+                    array_merge($this->apiMeta(), ['integration' => $integrationResult])
+                );
+            }
+        }
+
+        // Step 0b: Validasi appointment_id ke Appointment Service (REST internal, antar-container)
+        if (!empty($validated['appointment_id'])) {
+            $appointmentCheck = $this->internalServiceClient->getAppointment($validated['appointment_id']);
+            $integrationResult['appointment_check'] = $appointmentCheck['success'] ? 'success' : 'failed';
+
+            if (!$appointmentCheck['success']) {
+                return $this->errorResponse(
+                    'Resep tidak dapat dibuat: '.$appointmentCheck['message'],
+                    422,
+                    null,
+                    array_merge($this->apiMeta(), ['integration' => $integrationResult])
+                );
+            }
+        }
+
+        // Simpan resep ke database (baru dilakukan setelah validasi lintas-service lolos)
+        $pharmacy = Pharmacy::create($validated);
 
         // Step 1: Login SSO Warga untuk dapat JWT (digunakan SOAP & RabbitMQ)
         $token = $this->ssoService->loginM2M();

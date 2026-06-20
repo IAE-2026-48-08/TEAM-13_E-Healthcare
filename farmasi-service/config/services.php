@@ -34,5 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+	'internal' => [
+        'data_pasien_url' => env('DATA_PASIEN_SERVICE_URL', 'http://data-pasien-service:8000'),
+        'data_pasien_key' => env('DATA_PASIEN_API_KEY', '102022400238'),
+        'appointment_url' => env('APPOINTMENT_SERVICE_URL', 'http://appointment-service:8000'),
+        'appointment_key' => env('APPOINTMENT_API_KEY', 'KEY-MHS-157'),
+    ],
 
 ];
