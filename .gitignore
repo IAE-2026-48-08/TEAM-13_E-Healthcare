@@ -1,0 +1,22 @@
+# Environment configuration
+
+.env
+.env.*
+!.env.example
+
+# Dependencies
+
+/vendor/
+
+# Build and temporary files
+
+buildlog.txt
+*.log
+*.zip
+
+# Operating system and editor files
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
