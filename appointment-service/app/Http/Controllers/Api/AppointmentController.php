@@ -165,8 +165,7 @@ class AppointmentController extends Controller
             $farmasiResponse = \Illuminate\Support\Facades\Http::withHeaders([
                 'X-IAE-KEY' => 'KEY-MHS-157'
             ])->post('http://farmasi-service:8000/api/v1/pharmacy', [
-                'patient_id' => '00000000-0000-0000-0000-000000000000', // Default dummy UUID
-                'appointment_id' => '00000000-0000-0000-0000-000000000000', // Default dummy UUID
+                'appointment_id' => (string) $appointment->id,
                 'medicine_name' => 'Konsultasi Standar (Vitamin C)',
                 'dosage' => '1 tablet',
                 'frequency' => '1x sehari',
@@ -174,15 +173,24 @@ class AppointmentController extends Controller
                 'instructions' => 'Diminum setelah makan',
                 'status' => 'PENDING'
             ]);
-            $farmasiResult = $farmasiResponse->successful() ? $farmasiResponse->json() : ['error' => 'Gagal memanggil Farmasi', 'details' => $farmasiResponse->body()];
+
+            $farmasiResult = $farmasiResponse->successful()
+                ? $farmasiResponse->json()
+                : [
+                    'error' => 'Gagal memanggil Farmasi',
+                    'details' => $farmasiResponse->body()
+                ];
         } catch (\Exception $e) {
-            $farmasiResult = ['error' => 'Exception saat memanggil Farmasi', 'message' => $e->getMessage()];
+            $farmasiResult = [
+                'error' => 'Exception saat memanggil Farmasi',
+                'message' => $e->getMessage()
+            ];
         }
 
         // Dapatkan M2M Token
-        $m2mResponse = \Illuminate\Support\Facades\Http::post('https://iae-sso.virtualfri.id/api/v1/auth/token', [
-            'api_key' => env('IAE_API_KEY', 'KEY-MHS-157'),
-            'nim' => '102022400084'
+       $m2mResponse = \Illuminate\Support\Facades\Http::post('https://iae-sso.virtualfri.id/api/v1/auth/token', [
+        'api_key' => env('IAE_API_KEY', 'KEY-MHS-390'),
+        'nim' => '102022400300',
         ]);
         $m2mToken = $m2mResponse->json('token') ?? $m2mResponse->json('access_token');
 
