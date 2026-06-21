@@ -13,6 +13,7 @@ RUN npm install && npm run build
 EXPOSE 8000
 CMD touch database/database.sqlite && \
     php artisan migrate --force && \
+    php artisan db:seed --class=PatientSeeder --force && \
     php artisan clear-compiled && \
     php artisan optimize:clear && \
     php artisan serve --host=0.0.0.0 --port=8000
