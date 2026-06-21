@@ -2,59 +2,61 @@
 
 Seluruh perubahan penting pada proyek TEAM 13 E-Healthcare dicatat dalam dokumen ini.
 
-## [1.0.0] — 2026-06-21
+## [1.0.0] - 2026-06-21
 
 ### Added
 
-* Tiga microservice Laravel:
-
-  * Data Pasien Service
-  * Appointment Service
-  * Farmasi dan Obat Service
-* API Gateway menggunakan Nginx pada port `8081`.
-* Docker Compose untuk menjalankan seluruh service.
-* Database SQLite dengan named volume untuk setiap service.
-* Middleware API Key pada setiap microservice.
-* Integrasi JWT M2M melalui IAE SSO.
-* Integrasi SOAP Audit untuk mencatat transaksi.
-* Integrasi RabbitMQ Publisher untuk mengirim event.
-* Integrasi Appointment Service dengan Data Pasien Service.
-* Integrasi Appointment Service dengan Farmasi Service.
-* Validasi silang pasien dan appointment pada Farmasi Service.
-* Atribut `patient_id` pada data appointment.
-* Atribut `patient_id` dan `appointment_id` pada data resep.
-* Dokumentasi pembagian kontribusi anggota tim.
+- Menambahkan Data Pasien Service.
+- Menambahkan Appointment Service.
+- Menambahkan Farmasi dan Obat Service.
+- Menambahkan API Gateway menggunakan Nginx pada port `8081`.
+- Menambahkan Docker Compose untuk menjalankan seluruh service.
+- Menambahkan database SQLite terpisah untuk setiap service.
+- Menambahkan middleware API Key pada setiap microservice.
+- Menambahkan integrasi JWT M2M melalui IAE SSO.
+- Menambahkan integrasi SOAP Audit.
+- Menambahkan RabbitMQ Publisher.
+- Menambahkan komunikasi antar service untuk validasi data pasien dan appointment.
+- Menambahkan atribut `patient_id` pada appointment.
+- Menambahkan atribut `patient_id` dan `appointment_id` pada data resep.
+- Menambahkan dokumentasi kontribusi anggota tim.
 
 ### Changed
 
-* API Key setiap service dibaca dari environment Docker.
-* Appointment Service menggunakan beberapa PHP CLI server worker.
-* Pembuatan appointment memvalidasi pasien sebelum menyimpan data.
-* Pembuatan appointment otomatis menjalankan integrasi SSO, SOAP, RabbitMQ, dan Farmasi.
-* Farmasi Service memvalidasi pasien dan appointment sebelum menyimpan resep.
-* Konfigurasi komunikasi antarmicroservice dipusatkan pada `docker-compose.yml`.
+- API Key seluruh service dipindahkan ke environment Docker.
+- Proses pembuatan appointment sekarang melakukan validasi pasien terlebih dahulu.
+- Appointment Service otomatis menjalankan integrasi SSO, SOAP, RabbitMQ, dan Farmasi Service.
+- Farmasi Service sekarang memvalidasi data pasien dan appointment sebelum menyimpan resep.
+- Konfigurasi komunikasi antar service dipusatkan di `docker-compose.yml`.
 
 ### Fixed
 
-* Memperbaiki API Key Data Pasien menjadi `KEY-MHS-279`.
-* Memperbaiki API Key Appointment menjadi `KEY-MHS-390`.
-* Memperbaiki API Key Farmasi menjadi `KEY-MHS-157`.
-* Memperbaiki validasi `patient_id` dan `appointment_id` pada Farmasi Service.
-* Memperbaiki encoding `farmasi-service/routes/console.php`.
-* Memperbaiki URL internal antarmicroservice.
-* Memperbaiki deadlock ketika Farmasi Service memvalidasi Appointment Service.
-* Memperbaiki struktur dan indentasi `docker-compose.yml`.
+- Memperbaiki API Key untuk seluruh service.
+- Memperbaiki validasi `patient_id` pada Appointment Service.
+- Memperbaiki validasi `patient_id` dan `appointment_id` pada Farmasi Service.
+- Memperbaiki URL komunikasi antar service.
+- Memperbaiki deadlock saat Farmasi Service melakukan validasi appointment.
+- Memperbaiki encoding file `farmasi-service/routes/console.php`.
+- Merapikan konfigurasi `docker-compose.yml`.
 
 ### Tested
 
-* GET dan POST Data Pasien melalui API Gateway.
-* GET dan POST Appointment melalui API Gateway.
-* GET data resep melalui API Gateway.
-* Integrasi end-to-end Data Pasien, Appointment, dan Farmasi.
-* Integrasi JWT M2M, SOAP Audit, dan RabbitMQ.
-* API Key salah menghasilkan `401 Unauthorized`.
-* JWT salah atau kedaluwarsa menghasilkan `401 Unauthorized`.
-* Pasien tidak ditemukan menghasilkan `404`.
-* Request tanpa field wajib menghasilkan `422`.
-* Appointment tidak dibuat ketika validasi pasien gagal.
-* Resep menyimpan `patient_id` dan `appointment_id`.
+- GET dan POST Data Pasien melalui API Gateway.
+- GET dan POST Appointment melalui API Gateway.
+- GET dan POST Resep melalui API Gateway.
+- Validasi API Key berhasil menghasilkan response yang sesuai.
+- JWT tidak valid menghasilkan `401 Unauthorized`.
+- Data pasien yang tidak ditemukan menghasilkan `404 Not Found`.
+- Request tanpa field wajib menghasilkan `422 Unprocessable Entity`.
+- Validasi pasien sebelum pembuatan appointment.
+- Validasi pasien dan appointment sebelum pembuatan resep.
+- Integrasi JWT M2M, SOAP Audit, dan RabbitMQ.
+- Integrasi end-to-end antara Data Pasien, Appointment, dan Farmasi Service.
+- Pengiriman event ke RabbitMQ berhasil dilakukan.
+- SOAP receipt berhasil diterima dari layanan audit.
+
+### Deployment
+
+- Seluruh service berhasil dijalankan menggunakan Docker Compose.
+- API Gateway berhasil menghubungkan seluruh microservice.
+- Komunikasi antar container berjalan dengan baik.
