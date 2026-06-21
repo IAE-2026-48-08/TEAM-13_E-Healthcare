@@ -2,26 +2,74 @@ services:
   appointment-service:
     build:
       context: ./appointment-service
+      dockerfile: Dockerfile
     container_name: appointment-service
+    environment:
+      APP_ENV: local
+      PHP_CLI_SERVER_WORKERS: "4"
+      IAE_API_KEY: KEY-MHS-390
+      IAE_NIM: "102022400300"
+      IAE_SSO_TOKEN_URL: https://iae-sso.virtualfri.id/api/v1/auth/token
+      DATA_PASIEN_SERVICE_URL: http://data-pasien-service:8000
+      DATA_PASIEN_API_KEY: KEY-MHS-279
+      FARMASI_SERVICE_URL: http://farmasi-service:8000
+      FARMASI_API_KEY: KEY-MHS-157
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/database-data/database.sqlite
+    command: >
+      sh -c "mkdir -p /var/www/database-data &&
+             touch /var/www/database-data/database.sqlite &&
+             php artisan migrate --force &&
+             php artisan serve --host=0.0.0.0 --port=8000 --no-reload"
+
+    volumes:
+      - appointment-data:/var/www/database-data
     networks:
       - laravel
 
   data-pasien-service:
     build:
       context: ./data-pasien-service
+      dockerfile: Dockerfile
     container_name: data-pasien-service
+    environment:
+      APP_ENV: local
+      IAE_API_KEY: KEY-MHS-279
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/database-data/database.sqlite
+    command: >
+      sh -c "mkdir -p /var/www/database-data &&
+             touch /var/www/database-data/database.sqlite &&
+             php artisan migrate --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+    volumes:
+      - patient-data:/var/www/database-data
     networks:
       - laravel
 
   farmasi-service:
     build:
       context: ./farmasi-service
+      dockerfile: Dockerfile
     container_name: farmasi-service
+    environment:
+      APP_ENV: local
+      IAE_API_KEY: KEY-MHS-157
+      APPOINTMENT_SERVICE_URL: http://appointment-service:8000
+      APPOINTMENT_API_KEY: KEY-MHS-390
+      DATA_PASIEN_SERVICE_URL: http://data-pasien-service:8000
+      DATA_PASIEN_API_KEY: KEY-MHS-279
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/database-data/database.sqlite
+    command: >
+      sh -c "mkdir -p /var/www/database-data &&
+             touch /var/www/database-data/database.sqlite &&
+             php artisan migrate --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+    volumes:
+      - pharmacy-data:/var/www/database-data
     networks:
       - laravel
-    environment:
-    - IAE_API_KEY=KEY-MHS-157
-    - APP_ENV=local
 
   api-gateway:
     image: nginx:alpine
@@ -40,3 +88,8 @@ services:
 networks:
   laravel:
     driver: bridge
+
+volumes:
+  appointment-data:
+  patient-data:
+  pharmacy-data:

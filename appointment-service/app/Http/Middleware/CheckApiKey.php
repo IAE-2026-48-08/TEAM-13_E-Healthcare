@@ -12,7 +12,7 @@ class CheckApiKey
     {
         $apiKey = $request->header('X-IAE-KEY');
 
-        $expectedKey = env('IAE_API_KEY', 'KEY-MHS-157');
+        $expectedKey = env('IAE_API_KEY', 'KEY-MHS-390');
         if ($apiKey !== $expectedKey) {
             return response()->json([
                 'status' => 'error',
