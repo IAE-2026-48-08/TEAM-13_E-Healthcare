@@ -11,7 +11,7 @@ services:
       IAE_NIM: "102022400300"
       IAE_SSO_TOKEN_URL: https://iae-sso.virtualfri.id/api/v1/auth/token
       DATA_PASIEN_SERVICE_URL: http://data-pasien-service:8000
-      DATA_PASIEN_API_KEY: KEY-MHS-279
+      DATA_PASIEN_API_KEY: "KEY-MHS-279"
       FARMASI_SERVICE_URL: http://farmasi-service:8000
       FARMASI_API_KEY: KEY-MHS-157
       DB_CONNECTION: sqlite
@@ -20,7 +20,7 @@ services:
       sh -c "mkdir -p /var/www/database-data &&
              touch /var/www/database-data/database.sqlite &&
              php artisan migrate --force &&
-             php artisan serve --host=0.0.0.0 --port=8000 --no-reload"
+             php -S 0.0.0.0:8000 public/index.php"
 
     volumes:
       - appointment-data:/var/www/database-data
@@ -41,7 +41,7 @@ services:
       sh -c "mkdir -p /var/www/database-data &&
              touch /var/www/database-data/database.sqlite &&
              php artisan migrate --force &&
-             php artisan serve --host=0.0.0.0 --port=8000"
+             php -S 0.0.0.0:8000 public/index.php"
     volumes:
       - patient-data:/var/www/database-data
     networks:
@@ -58,14 +58,14 @@ services:
       APPOINTMENT_SERVICE_URL: http://appointment-service:8000
       APPOINTMENT_API_KEY: KEY-MHS-390
       DATA_PASIEN_SERVICE_URL: http://data-pasien-service:8000
-      DATA_PASIEN_API_KEY: KEY-MHS-279
+      DATA_PASIEN_API_KEY: "KEY-MHS-279"
       DB_CONNECTION: sqlite
       DB_DATABASE: /var/www/database-data/database.sqlite
     command: >
       sh -c "mkdir -p /var/www/database-data &&
              touch /var/www/database-data/database.sqlite &&
              php artisan migrate --force &&
-             php artisan serve --host=0.0.0.0 --port=8000"
+             php -S 0.0.0.0:8000 public/index.php"
     volumes:
       - pharmacy-data:/var/www/database-data
     networks:
@@ -93,3 +93,4 @@ volumes:
   appointment-data:
   patient-data:
   pharmacy-data:
+
